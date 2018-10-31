@@ -1,6 +1,9 @@
 import setting
+import pandas as pd
+import dataProcess
 
-setting.init()
+
+dataProcess.run()
 
 # Source:
 # Modified from https://towardsdatascience.com/topic-modelling-in-python-with-nltk-and-gensim-4ef03213cd21
