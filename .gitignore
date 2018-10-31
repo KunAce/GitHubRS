@@ -108,3 +108,7 @@ venv.bak/
 
 # DataSet
 .dataset/
+
+#LDA related
+.src/*gensim*
+.src/corpus.pkl
