@@ -1,5 +1,6 @@
 # Import necessary packages
 import pandas as pd
+import setting
 
 # Read the CSV file for 'Project'
 #ignore the first row because it is a false entry
@@ -23,8 +24,9 @@ dfwatcherscount=pd.DataFrame({'popularity':dfwatchers.groupby(['repo_id']).size(
 # print(dfwatcherscount.head())
 
 # Merge the popularity to 'projects' table
-res=pd.merge(dfproject,dfwatcherscount,left_on='id',right_on='repo_id',how='left')
-print(res.head())
+setting.init()
+setting.res=pd.merge(dfproject,dfwatcherscount,left_on='id',right_on='repo_id',how='left')
+print(setting.res.head())
 
 # print(df.tail())
 

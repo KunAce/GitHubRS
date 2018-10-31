@@ -1,8 +1,9 @@
-import os
-os.system('python readFile.py')
+import setting
 
-#Source:
-#Modified from https://towardsdatascience.com/topic-modelling-in-python-with-nltk-and-gensim-4ef03213cd21
+setting.init()
+
+# Source:
+# Modified from https://towardsdatascience.com/topic-modelling-in-python-with-nltk-and-gensim-4ef03213cd21
 
 # Topic Modelling
 
@@ -11,11 +12,13 @@ os.system('python readFile.py')
 # Text Cleaning
 
 
-#return a list of tokens
-import spacy
-#spacy.load('en_core_web_sm')
+# return a list of tokens
+# import spacy
+# spacy.load('en_core_web_sm')
 from spacy.lang.en import English
 parser = English()
+
+
 def tokenize(text):
     lda_tokens = []
     tokens = parser(text)
@@ -32,7 +35,9 @@ def tokenize(text):
 
 # Find the meanings of words by using NLTK's Wordnet
 
+
 import nltk
+
 
 nltk.download('wordnet')
 from nltk.corpus import wordnet as wn
@@ -45,7 +50,10 @@ def get_lemma(word):
     else:
         return lemma
 
+
 from nltk.stem.wordnet import WordNetLemmatizer
+
+
 def get_lemma2(word):
     return WordNetLemmatizer().lemmatize(word)
 
@@ -66,7 +74,7 @@ def prepare_text_for_lda(text):
 # Convert text data from 'description'
 import random
 text_data = []
-resDesc=res.loc[:,['description']]
+resDesc=setting.res.loc[:,['description']]
 resDesc = resDesc[pd.notnull(resDesc['description'])]
 
 # #temporarily fill the NAN
@@ -106,6 +114,7 @@ for topic in topics:
 dictionary = gensim.corpora.Dictionary.load('dictionary.gensim')
 corpus = pickle.load(open('corpus.pkl', 'rb'))
 lda = gensim.models.ldamodel.LdaModel.load('model5.gensim')
+
 
 import pyLDAvis.gensim
 lda_display = pyLDAvis.gensim.prepare(lda, corpus, dictionary, sort_topics=False)
