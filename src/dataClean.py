@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 
-def run():
+def cleanProject():
     # Read the CSV file for 'Project'
     #ignore the first row because it is a false entry
 
@@ -20,12 +20,6 @@ def run():
 
     # Output the new CSV file
     dfproject.to_csv('../dataset/project_test.csv', sep=',')
-
-
-run()
-
-
-
 
 
 
