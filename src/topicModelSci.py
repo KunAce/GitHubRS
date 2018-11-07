@@ -10,14 +10,14 @@ import pyLDAvis.sklearn
 dataProcess.run()
 
 # get the raw 'description' from new 'project' table
-resDesc = setting.res.loc[:,['description']]
+resDesc = setting.res.loc[7:8,['description']]
 resDesc = resDesc[pd.notnull(resDesc['description'])]
 
 # set up variables
 
 n_features=1000
 n_topics=10
-n_top_wrods = 20
+n_top_words = 10
 
 # feature_extraction and vectorization
 
@@ -45,10 +45,10 @@ def print_top_words(model, feature_names, n_top_words):
 
 
 tf_feature_names = tf_vectorizer.get_feature_names()
-print_top_words(lda, tf_feature_names, n_top_wrods)
+print_top_words(lda, tf_feature_names, n_top_words)
 
 
 # pyLDAvis to show graph
 
-graph = pyLDAvis.sklearn.prepare(lda, tf, tf_vectorizer)
-pyLDAvis.show(graph)
+# graph = pyLDAvis.sklearn.prepare(lda, tf, tf_vectorizer)
+# pyLDAvis.show(graph)
