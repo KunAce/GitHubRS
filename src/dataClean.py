@@ -10,7 +10,7 @@ def cleanProject():
     dfproject=pd.DataFrame(file)
 
     # 1) clean 'forked from'
-    #print(dfproject['forked_from'].values.astype(str).dtype)
+    # Only not 'forked_from' records are kept (with '\N')
     dfproject = dfproject[dfproject['forked_from'].values.astype(str) == '\\N']
 
     # 2) clean 'deleted'
