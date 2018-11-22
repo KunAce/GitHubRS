@@ -1,33 +1,31 @@
 # Import necessary packages
 import pandas as pd
 
-def cleanProject():
+
+def clean(df_chunk):
     # Read the CSV file for 'Project'
     #ignore the first row because it is a false entry
 
-    file=pd.read_csv('../dataset/projects.csv', nrows=2000, skiprows=1, names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown'])
-    dfproject=pd.DataFrame(file)
-
     # 1) clean 'forked from'
     # Only not 'forked_from' records are kept (with '\N')
-    dfproject = dfproject[dfproject['forked_from'].values.astype(str) == '\\N']
+    df_chunk = df_chunk[df_chunk['forked_from'].values.astype(str) == '\\N']
 
     # 2) clean 'deleted'
-    dfproject = dfproject[dfproject['deleted'] == 0]
+    df_chunk = df_chunk[df_chunk['deleted'] == 0]
 
     # 3) clean 'unknown' column
-    dfproject = dfproject.drop('unknown', 1)
+    df_chunk = df_chunk.drop('unknown', 1)
 
     # 4) re-format the 'url' column to make the links usable
-    dfproject['url'].replace({'api.': ''}, inplace=True, regex=True)
-    dfproject['url'].replace({'repos/': ''}, inplace=True, regex=True)
+    df_chunk['url'].replace({'api.': ''}, inplace=True, regex=True)
+    df_chunk['url'].replace({'repos/': ''}, inplace=True, regex=True)
 
 
     # Output the new CSV file
-    dfproject.to_csv('../dataset/project_test_2.csv', sep=',')
+    df_chunk.to_csv('../dataset/project_test_1.csv', sep=',',mode='a')
 
 
+# Read the csv file Chunk by Chunk # chunksize =3000
 
-
-
-cleanProject()
+for chunk in pd.read_csv('../dataset/projects.csv', skiprows=1, names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown'],chunksize=3000):
+    clean(chunk)
