@@ -6,12 +6,19 @@ def clean(df_chunk):
     # Read the CSV file for 'Project'
     #ignore the first row because it is a false entry
 
+    # 1) clean duplicates
+    df_chunk.drop_duplicates()
+
+    # 2) clean entry with empty description
+    print(df_chunk['description'].isnull().value_counts())
+    df_chunk.dropna(subset=['description'])
+
     # 1) clean 'forked from'
     # Only not 'forked_from' records are kept (with '\N')
     df_chunk = df_chunk[df_chunk['forked_from'].values.astype(str) == '\\N']
 
     # 2) clean 'deleted'
-    df_chunk = df_chunk[df_chunk['deleted'] == 0]
+    df_chunk = df_chunk[df_chunk['deleted'] == '0']
 
     # 3) clean 'unknown' column
     df_chunk = df_chunk.drop('unknown', 1)
@@ -22,7 +29,7 @@ def clean(df_chunk):
 
 
     # Output the new CSV file
-    # df_chunk.to_csv('../dataset/project_test_new.csv', sep=',',mode='a')
+    df_chunk.to_csv('../dataset/project_test_new.csv', sep=',',mode='a')
 
 
 
@@ -31,18 +38,24 @@ def clean(df_chunk):
 # for chunk in pd.read_csv('../dataset/projects.csv', skiprows=1, names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown'],chunksize=3000, error_bad_lines=False):
 #     clean(chunk)
 
-reader = pd.read_csv('../dataset/projects.csv', iterator = True, error_bad_lines = False)
+col_names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown']
 
-if_loop =  True
-chunk_size = 100000
-chunks = []
+
+reader = pd.read_csv('../dataset/projects.csv', skiprows = 1, iterator = True, error_bad_lines = False, names = col_names)
+
+if_loop = True
+chunk_size = 1000000
+number_of_chunk = 0
 while if_loop:
     try:
-        df_chunk = reader.get_chunk(chunk_size)
+        df_chunk = pd.DataFrame(reader.get_chunk(chunk_size))
         clean(df_chunk)
-        chunks.append(df_chunk)
+        number_of_chunk += 1
+        if (number_of_chunk == 1 ):
+            if_loop = False
+            break
     except StopIteration:
         if_loop = False
         print("Iteration is stopped.")
 
-df_chunk = pd.concat(chunks, ignore_index=True)
+# df_chunk = pd.concat(chunks, ignore_index=True)
