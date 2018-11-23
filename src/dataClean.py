@@ -22,10 +22,27 @@ def clean(df_chunk):
 
 
     # Output the new CSV file
-    df_chunk.to_csv('../dataset/project_test_1.csv', sep=',',mode='a')
+    # df_chunk.to_csv('../dataset/project_test_new.csv', sep=',',mode='a')
+
 
 
 # Read the csv file Chunk by Chunk # chunksize =3000
 
-for chunk in pd.read_csv('../dataset/projects.csv', skiprows=1, names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown'],chunksize=3000):
-    clean(chunk)
+# for chunk in pd.read_csv('../dataset/projects.csv', skiprows=1, names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown'],chunksize=3000, error_bad_lines=False):
+#     clean(chunk)
+
+reader = pd.read_csv('../dataset/projects.csv', iterator = True, error_bad_lines = False)
+
+if_loop =  True
+chunk_size = 100000
+chunks = []
+while if_loop:
+    try:
+        df_chunk = reader.get_chunk(chunk_size)
+        clean(df_chunk)
+        chunks.append(df_chunk)
+    except StopIteration:
+        if_loop = False
+        print("Iteration is stopped.")
+
+df_chunk = pd.concat(chunks, ignore_index=True)
