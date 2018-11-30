@@ -1,16 +1,12 @@
-import setting
 import pandas as pd
-import dataProcess
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+from archived import dataProcess, setting
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-import pyLDAvis
-import pyLDAvis.sklearn
-
 
 dataProcess.run()
 
 # get the raw 'description' from new 'project' table
-resDesc = setting.res.loc[7:8,['description']]
+resDesc = setting.res.loc[7:8, ['description']]
 resDesc = resDesc[pd.notnull(resDesc['description'])]
 
 # set up variables

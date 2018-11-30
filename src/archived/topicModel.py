@@ -1,7 +1,5 @@
-import setting
 import pandas as pd
-import dataProcess
-
+from archived import dataProcess, setting
 
 dataProcess.run()
 
@@ -75,9 +73,8 @@ def prepare_text_for_lda(text):
     return tokens
 
 # Convert text data from 'description'
-import random
 text_data = []
-resDesc=setting.res.loc[:,['description']]
+resDesc= setting.res.loc[:, ['description']]
 resDesc = resDesc[pd.notnull(resDesc['description'])]
 
 # #temporarily fill the NAN

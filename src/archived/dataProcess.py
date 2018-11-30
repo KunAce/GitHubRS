@@ -1,6 +1,7 @@
 # Import necessary packages
 import pandas as pd
-import setting
+from archived import setting
+
 
 def run():
     # Read the CSV file for 'Project'
@@ -24,6 +25,6 @@ def run():
 
     # Merge the popularity to 'projects' table
     setting.init()
-    setting.res=pd.merge(dfproject,dfwatcherscount,left_on='id',right_on='repo_id',how='left')
+    setting.res=pd.merge(dfproject, dfwatcherscount, left_on='id', right_on='repo_id', how='left')
     print(setting.res.head())
 
