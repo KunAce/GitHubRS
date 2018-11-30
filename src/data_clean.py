@@ -36,7 +36,7 @@ def clean(df_chunk):
     df_chunk['url'].replace({'repos/': ''}, inplace=True, regex=True)
 
     # Output the new CSV file
-    df_chunk.to_csv('../dataset/project_clean.csv', sep=',',mode='a', encoding='utf_8_sig', index = False, chunksize = 200000)
+    df_chunk.to_csv('../dataset/project_clean_done.csv', sep=',',mode='a', encoding='utf_8_sig', index = False, chunksize = 200000)
 
 
 
