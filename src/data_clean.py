@@ -22,7 +22,7 @@ def clean(df_chunk):
     df_chunk = df_chunk[df_chunk['forked_from'].values.astype(str) == '\\N']
 
     # 2) clean 'deleted'
-    df_chunk = df_chunk[df_chunk['deleted'] == 0]
+    df_chunk = df_chunk[df_chunk['deleted'] == '0' ]
 
     # 3) clean 'unknown' column
     df_chunk.drop('unknown', axis = 1, inplace = True)
@@ -36,16 +36,17 @@ def clean(df_chunk):
     df_chunk['url'].replace({'repos/': ''}, inplace=True, regex=True)
 
     # Output the new CSV file
-    df_chunk.to_csv('../dataset/project_clean.csv', sep=',',mode='a')
+    df_chunk.to_csv('../dataset/project_clean.csv', sep=',',mode='a', encoding='utf_8_sig', index = False, chunksize = 200000)
 
 
 
-# Read the csv file Chunk by Chunk # chunksize =3000
+# Read the csv file Chunk by Chunk
 
 col_names=['id','url','owner_id','name','description','language','created_at','forked_from','deleted','updated_at','unknown']
+dtypes ={'id':str, 'owner_id':str, 'deleted':str}
 
+reader = pd.read_csv('../dataset/projects.csv', skiprows = 1, iterator = True, error_bad_lines = False, names = col_names, encoding='utf-8', dtype = dtypes)
 
-reader = pd.read_csv('../dataset/projects.csv', skiprows = 1, iterator = True, error_bad_lines = False, names = col_names)
 
 if_loop = True
 chunk_size = 200000
