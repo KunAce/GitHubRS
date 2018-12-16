@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 from nltk.corpus import stopwords
 import nltk
 
@@ -18,6 +17,12 @@ from gensim.models import CoherenceModel
 
 # Spacy for lemmatization
 import spacy
+
+# Plotting tools
+import pyLDAvis
+import pyLDAvis.gensim
+import matplotlib.pyplot as plt
+# %matplotlib inline
 
 # Prepare Stopwords
 
@@ -97,7 +102,6 @@ vectorizer = TfidfVectorizer()
 desc_lemmatized_str = [' '.join(text) for text in desc_lemmatized]
 A = vectorizer.fit_transform(desc_lemmatized_str)
 
-
 # Access the list of all terms and an associated dictionary (vocabulary_)
 # which maps each unique term to a corresponding column in the matrix.
 terms = vectorizer.get_feature_names()
@@ -113,9 +117,6 @@ from sklearn import decomposition
 model = decomposition.NMF(n_components=k, init="nndsvd")
 W = model.fit_transform(A)
 H = model.components_
-
-
-
 
 # import numpy as np
 top_indices = np.argsort( H[topic_index,:] )[::-1]
