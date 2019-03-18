@@ -34,7 +34,7 @@ stop_words.extend(['from','re','edu','use'])
 # Import the 'description' data
 
 col_names = ['name','description']
-reader = pd.read_csv('../dataset/desc_en.csv', encoding='utf_8_sig', names=col_names,skiprows = 1, nrows = 1000)
+reader = pd.read_csv('../dataset/desc_en.csv', encoding='utf_8_sig', names=col_names,skiprows = [0,15505], nrows= 1000)
 
 # Convert each row of description to list
 desc_list = reader['description'].values.tolist()
@@ -91,42 +91,119 @@ nlp = spacy.load('en', disable=['parser', 'ner'])
 # Do lemmatization keeping only noun, adj, vb, adv
 desc_lemmatized = lemmatization(desc_words_bigrams, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV'])
 
+print("Finish creating 'desc_lemmatized'.")
 
-# Vectorization => TF-IDF
-# from sklearn.feature_extraction.text import CountVectorizer
-# vectorizer = CountVectorizer()
-# A = vectorizer.fit_transform(desc_lemmatized)
-from sklearn.feature_extraction.text import TfidfVectorizer
-vectorizer = TfidfVectorizer()
 
-desc_lemmatized_str = [' '.join(text) for text in desc_lemmatized]
-A = vectorizer.fit_transform(desc_lemmatized_str)
+# Create the Dictionary and Corpus for Topic Modeling
 
-# Access the list of all terms and an associated dictionary (vocabulary_)
-# which maps each unique term to a corresponding column in the matrix.
+# Create Dictionary
+# id2word = corpora.Dictionary(desc_lemmatized)
+
+# Create Corpus
+desc_lemmatized_corpus = desc_lemmatized
+
+# Term Document Frequency
+# corpus = [id2word.doc2bow(desc_item) for desc_item in desc_lemmatized_corpus]
+#
+from sklearn.externals import joblib
+#
+# joblib.dump((id2word,desc_lemmatized,desc_lemmatized_corpus,corpus), "../model/desc_NMF_data.pkl")
+
+# CountVectorizer
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+desc_lemmatized_corpus = [' '.join(text) for text in desc_lemmatized_corpus]
+vectorizer = CountVectorizer(stop_words = stop_words,  min_df= 20)
+A = vectorizer.fit_transform(desc_lemmatized_corpus)
+print( "Created %d X %d document-term matrix" % (A.shape[0], A.shape[1]) )
+
 terms = vectorizer.get_feature_names()
-# len(terms)
+print("Vocabulary has %d distinct terms" % len(terms))
 
-vocab = vectorizer.vocabulary_
-# vocab["world"]
+# joblib.dump((A,terms), "../model/desc_NMF_CountVectorizer_test.pkl")
 
-# Number of Topics
-k = 50
+# Applying Term Weighting with TF-IDF
+
+# NMF Topic Models
+
+# Create the Topic Models and Test different Ks
+kmin, kmax = 1, 30
 
 from sklearn import decomposition
-model = decomposition.NMF(n_components=k, init="nndsvd")
-W = model.fit_transform(A)
-H = model.components_
+topic_models = []
+# try each value of k
+for k in range(kmin,kmax+1):
+    print("Applying NMF for k=%d ..." % k )
+    # run NMF
+    model = decomposition.NMF( init="nndsvd", n_components=k )
+    W = model.fit_transform( A )
+    H = model.components_
+    # store for later
+    topic_models.append( (k,W,H) )
 
-# import numpy as np
-top_indices = np.argsort( H[topic_index,:] )[::-1]
-top_terms = []
-for term_index in top_indices[0:top]:
-    top_terms.append( terms[term_index] )
+
+# Build a Word Embedding
+# import re
+# class TokenGenerator:
+#     def __init__( self, documents):
+#         self.documents = documents
+#         self.stopwords = stopwords
+#         self.tokenizer = re.compile( r"(?u)\b\w\w+\b" )
+#
+#     def __iter__( self ):
+#         print("Building Word2Vec model ...")
+#         for doc in self.documents:
+#             tokens = []
+#             for tok in self.tokenizer.findall( doc ):
+#                 if tok in self.stopwords:
+#                     tokens.append( "<stopword>" )
+#                 elif len(tok) >= 2:
+#                     tokens.append( tok )
+#             yield tokens
+
+import gensim
+# docgen = TokenGenerator( desc_lemmatized_corpus, stop_words )
+# the model has 500 dimensions, the minimum document-term frequency is 20
+w2v_model = gensim.models.Word2Vec(desc_lemmatized)#, size=500, min_count=20, sg=1)
+print( "Model has %d terms" % len(w2v_model.wv.vocab) )
+
+# Selecting the Number of Topics
+
+def calculate_coherence( w2v_model, term_rankings ):
+    overall_coherence = 0.0
+    for topic_index in range(len(term_rankings)):
+        # check each pair of terms
+        pair_scores = []
+        for pair in combinations( term_rankings[topic_index], 2 ):
+            pair_scores.append( w2v_model.wv.similarity(pair[0], pair[1]) )
+        # get the mean for all pairs in this topic
+        topic_score = sum(pair_scores) / len(pair_scores)
+        overall_coherence += topic_score
+    # get the mean score across all topics
+    return overall_coherence / len(term_rankings)
 
 
-# top_indices = np.argsort( W[:,topic_index] )[::-1]
-top_documents = []
-for doc_index in top_indices[0:top]:
-    top_documents.append( desc_lemmatized_str[doc_index] )
+import numpy as np
+def get_descriptor( all_terms, H, topic_index, top ):
+    # reverse sort the values to sort the indices
+    top_indices = np.argsort( H[topic_index,:] )[::-1]
+    # now get the terms corresponding to the top-ranked indices
+    top_terms = []
+    for term_index in top_indices[0:top]:
+        top_terms.append( all_terms[term_index] )
+    return top_terms
 
+
+from itertools import combinations
+k_values = []
+coherences = []
+for (k,W,H) in topic_models:
+    # Get all of the topic descriptors - the term_rankings, based on top 10 terms
+    term_rankings = []
+    for topic_index in range(k):
+        term_rankings.append( get_descriptor( terms, H, topic_index,20 ) )
+    # Now calculate the coherence based on our Word2vec model
+    k_values.append( k )
+    coherences.append( calculate_coherence( w2v_model, term_rankings ) )
+    print("K=%02d: Coherence=%.4f" % ( k, coherences[-1] ) )
