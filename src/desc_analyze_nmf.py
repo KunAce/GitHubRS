@@ -34,7 +34,7 @@ stop_words.extend(['from','re','edu','use'])
 # Import the 'description' data
 
 col_names = ['name','description']
-reader = pd.read_csv('../dataset/desc_en.csv', encoding='utf_8_sig', names=col_names,skiprows = [0,15505], nrows= 1000)
+reader = pd.read_csv('../dataset/desc_en.csv', encoding='utf_8_sig', names=col_names,skiprows = [0,15505])
 
 # Convert each row of description to list
 desc_list = reader['description'].values.tolist()
@@ -114,7 +114,7 @@ from sklearn.externals import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 
 desc_lemmatized_corpus = [' '.join(text) for text in desc_lemmatized_corpus]
-vectorizer = CountVectorizer(stop_words = stop_words,  min_df= 20)
+vectorizer = CountVectorizer(stop_words = stop_words,  min_df= 1)
 A = vectorizer.fit_transform(desc_lemmatized_corpus)
 print( "Created %d X %d document-term matrix" % (A.shape[0], A.shape[1]) )
 
@@ -128,12 +128,12 @@ print("Vocabulary has %d distinct terms" % len(terms))
 # NMF Topic Models
 
 # Create the Topic Models and Test different Ks
-kmin, kmax = 1, 30
+kmin, kmax = 100, 500
 
 from sklearn import decomposition
 topic_models = []
 # try each value of k
-for k in range(kmin,kmax+1):
+for k in range(kmin,kmax+1,100):
     print("Applying NMF for k=%d ..." % k )
     # run NMF
     model = decomposition.NMF( init="nndsvd", n_components=k )
