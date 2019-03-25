@@ -128,12 +128,12 @@ print("Vocabulary has %d distinct terms" % len(terms))
 # NMF Topic Models
 
 # Create the Topic Models and Test different Ks
-kmin, kmax = 100, 500
+kmin, kmax = 5 , 80
 
 from sklearn import decomposition
 topic_models = []
 # try each value of k
-for k in range(kmin,kmax+1,100):
+for k in range(kmin,kmax+1,10):
     print("Applying NMF for k=%d ..." % k )
     # run NMF
     model = decomposition.NMF( init="nndsvd", n_components=k )
@@ -192,6 +192,8 @@ def get_descriptor( all_terms, H, topic_index, top ):
     top_terms = []
     for term_index in top_indices[0:top]:
         top_terms.append( all_terms[term_index] )
+    # output the results
+    print(top_terms)
     return top_terms
 
 
@@ -199,9 +201,11 @@ from itertools import combinations
 k_values = []
 coherences = []
 for (k,W,H) in topic_models:
-    # Get all of the topic descriptors - the term_rankings, based on top 10 terms
+    # Get all of the topic descriptors - the term_rankings, based on top 20 terms
     term_rankings = []
+    print('the topic number of ', k, ':')
     for topic_index in range(k):
+        print('Topic ',topic_index, ':')
         term_rankings.append( get_descriptor( terms, H, topic_index,20 ) )
     # Now calculate the coherence based on our Word2vec model
     k_values.append( k )
